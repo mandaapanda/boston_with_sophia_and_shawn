@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Boston Weekend with the Kims · Aug 2026</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
+  <style>
+    :root {
+      --cherry: #E8365D;
+      --peach: #FF9F6B;
+      --navy: #0D2137;
+      --cream: #FFF0E8;
+      --white: #fff;
+      --text: #1A1A1A;
+      --muted: #666;
+      --light: #999;
+      --border: #E8E8E8;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Poppins', system-ui, -apple-system, sans-serif;
+      color: var(--text);
+      background: #fff;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    a { color: inherit; text-decoration: none; }
+
+    /* ── HERO ── */
+    .hero {
+      background: var(--navy);
+      padding: 72px 24px 64px;
+      text-align: center;
+    }
+
+    .hero-label {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.35);
+      margin-bottom: 28px;
+    }
+
+    .hero-title {
+      font-size: clamp(44px, 9vw, 76px);
+      font-weight: 700;
+      color: #fff;
+      line-height: 1;
+      letter-spacing: -2px;
+      margin-bottom: 10px;
+    }
+
+    .hero-title span { color: var(--cherry); }
+
+    .hero-sub {
+      font-size: 13px;
+      font-weight: 500;
+      letter-spacing: 3px;
+      color: var(--peach);
+      text-transform: uppercase;
+      margin-bottom: 36px;
+    }
+
+    .hero-divider {
+      width: 40px;
+      height: 3px;
+      background: var(--cherry);
+      border-radius: 2px;
+      margin: 0 auto 36px;
+    }
+
+    .hero-tagline {
+      font-size: 16px;
+      color: rgba(255,255,255,0.6);
+      line-height: 1.7;
+      max-width: 460px;
+      margin: 0 auto;
+    }
+
+    /* ── STATS STRIP ── */
+    .stats {
+      background: var(--cream);
+      padding: 20px 24px;
+    }
+
+    .stats-inner {
+      max-width: 860px;
+      margin: 0 auto;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      justify-content: center;
+    }
+
+    .stat {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: var(--navy);
+      font-weight: 500;
+    }
+
+    .stat-icon { font-size: 16px; }
+
+    /* ── SECTION COMMON ── */
+    .section {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 64px 24px;
+    }
+
+    .section-label {
+      display: block;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      color: var(--cherry);
+      margin-bottom: 8px;
+    }
+
+    .section-title {
+      font-size: 26px;
+      font-weight: 600;
+      color: var(--navy);
+      margin-bottom: 8px;
+      line-height: 1.2;
+    }
+
+    .section-desc {
+      font-size: 14px;
+      color: var(--muted);
+      margin-bottom: 36px;
+      line-height: 1.7;
+      max-width: 520px;
+    }
+
+    hr.div { border: none; border-top: 1px solid var(--border); margin: 0; }
+
+    /* ── ACTIVITIES ── */
+    .activities-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 16px;
+    }
+
+    .activity-card {
+      background: var(--cream);
+      border-radius: 14px;
+      padding: 22px 20px;
+    }
+
+    .activity-icon {
+      font-size: 28px;
+      margin-bottom: 12px;
+      display: block;
+    }
+
+    .activity-name {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--navy);
+      margin-bottom: 5px;
+    }
+
+    .activity-detail {
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .activity-tag {
+      display: inline-block;
+      margin-top: 10px;
+      font-size: 10px;
+      font-weight: 600;
+      padding: 3px 9px;
+      border-radius: 100px;
+      background: rgba(232,54,93,0.1);
+      color: var(--cherry);
+    }
+
+    /* ── ITINERARY ── */
+    .itin-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 20px;
+    }
+
+    .day-card {
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+    }
+
+    .day-head { padding: 18px 20px; }
+    .day-head.sat { background: var(--navy); }
+    .day-head.sun { background: var(--cherry); }
+
+    .day-kicker {
+      font-size: 9px;
+      font-weight: 600;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.45);
+      margin-bottom: 4px;
+    }
+
+    .day-name {
+      font-size: 16px;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 2px;
+    }
+
+    .day-tag { font-size: 11px; font-weight: 500; }
+    .day-head.sat .day-tag { color: var(--peach); }
+    .day-head.sun .day-tag { color: rgba(255,255,255,0.85); }
+
+    .day-body {
+      padding: 18px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .row { display: flex; gap: 12px; align-items: flex-start; }
+    .row-icon { font-size: 18px; flex-shrink: 0; line-height: 1.3; }
+    .row-time {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--cherry);
+      margin-bottom: 2px;
+    }
+    .row-title { font-size: 13px; font-weight: 600; color: var(--navy); }
+    .row-detail { font-size: 11px; color: var(--muted); line-height: 1.55; margin-top: 2px; }
+    .row-sub {
+      margin-top: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+    .row-sub-item {
+      display: flex;
+      gap: 8px;
+      align-items: flex-start;
+      font-size: 11px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+    .row-sub-item strong { color: var(--navy); font-weight: 600; }
+    .rule { border-top: 1px solid var(--border); }
+
+    /* ── FOOD ── */
+    .food-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 16px;
+    }
+
+    .food-card {
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px;
+    }
+
+    .food-icon { font-size: 26px; margin-bottom: 10px; display: block; }
+    .food-name { font-size: 14px; font-weight: 600; color: var(--navy); margin-bottom: 4px; }
+    .food-name a {
+      color: var(--navy);
+      text-decoration: underline;
+      text-decoration-color: var(--peach);
+    }
+    .food-detail { font-size: 12px; color: var(--muted); line-height: 1.6; }
+
+    /* map link style */
+    .map-link {
+      color: var(--cherry);
+      font-weight: 600;
+      text-decoration: none;
+    }
+    .map-link:hover { text-decoration: underline; }
+
+    /* ── FOOTER ── */
+    footer {
+      background: var(--navy);
+      padding: 48px 24px;
+      text-align: center;
+    }
+
+    .footer-logo {
+      font-size: 22px;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 6px;
+    }
+
+    .footer-logo span { color: var(--cherry); }
+
+    .footer-sub {
+      font-size: 9px;
+      letter-spacing: 3px;
+      color: var(--peach);
+      text-transform: uppercase;
+      margin-bottom: 20px;
+    }
+
+    .footer-note {
+      font-size: 11px;
+      color: rgba(255,255,255,0.25);
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 600px) {
+      .hero { padding: 56px 20px 48px; }
+      .section { padding: 48px 20px; }
+      .activities-grid { grid-template-columns: 1fr 1fr; }
+      .food-grid { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ─── HERO ─── -->
+<header class="hero">
+  <p class="hero-label">Pack &amp; Play · Trip Planning</p>
+  <h1 class="hero-title">Boston <span>Weekend</span></h1>
+  <p class="hero-sub">Aug 29 – 30, 2026 · Boston, MA</p>
+  <div class="hero-divider"></div>
+  <p class="hero-tagline">A fun weekend in Boston with the Kims — embracing East Coast living and good food 🦞🍕</p>
+</header>
+
+<!-- ─── STATS STRIP ─── -->
+<div class="stats">
+  <div class="stats-inner">
+    <div class="stat"><span class="stat-icon">📅</span> Sat Aug 29 – Sun Aug 30, 2026</div>
+    <div class="stat"><span class="stat-icon">👥</span> Sophia &amp; Shawn</div>
+    <div class="stat"><span class="stat-icon">🦞</span> Exploring the city &amp; foodie spots</div>
+  </div>
+</div>
+
+<hr class="div">
+
+<!-- ─── MAP ─── -->
+<div class="section" style="padding-bottom: 24px;">
+  <span class="section-label">On the map</span>
+  <h2 class="section-title">Everything in one place</h2>
+  <p class="section-desc">The Seaport lunch crawl, the Encore water taxi option, Si Cara in Cambridge, and Sunday's park in Watertown — all plotted on one map. Tap any pin for details.</p>
+</div>
+<div style="position:relative;">
+  <div id="boston-map" style="width:100%; height:480px;"></div>
+  <div id="map-legend-box" style="position:absolute;bottom:20px;right:10px;z-index:999;background:rgba(255,255,255,0.96);border-radius:12px;padding:12px 14px;font-family:'Poppins',sans-serif;font-size:11px;box-shadow:0 2px 12px rgba(0,0,0,0.15);pointer-events:none;min-width:170px;">
+    <div style="font-weight:700;margin-bottom:8px;color:#0D2137;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;">Map Key</div>
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+      <span style="width:20px;height:20px;background:#E8365D;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;">🍽️</span>
+      <span style="color:#444;">Restaurants &amp; food</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <span style="width:20px;height:20px;background:#0EA5E9;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;">📍</span>
+      <span style="color:#444;">Stops &amp; landmarks</span>
+    </div>
+  </div>
+</div>
+
+<hr class="div">
+
+<!-- ─── ACTIVITIES ─── -->
+<div class="section">
+  <span class="section-label">What we're doing</span>
+  <h2 class="section-title">Activities</h2>
+
+  <div class="activities-grid">
+
+    <div class="activity-card">
+      <span class="activity-icon">🛍️</span>
+      <p class="activity-name">Seaport Summer Market</p>
+      <p class="activity-detail">40+ local makers and small businesses at Seaport Common. Runs Saturdays only, 11 AM – 6 PM. <a href="https://www.bostonseaport.xyz/event/seaport-summer-market" target="_blank" class="map-link">Details →</a></p>
+      <span class="activity-tag">Sat only</span>
+    </div>
+
+    <div class="activity-card">
+      <span class="activity-icon">☕</span>
+      <p class="activity-name">Coffee &amp; ice cream crawl</p>
+      <p class="activity-detail">Ralph's Coffee (Amanda wants to check it out) and Salt &amp; Straw — both new to the Seaport and walkable from the market.</p>
+      <span class="activity-tag">Seaport</span>
+    </div>
+
+    <div class="activity-card">
+      <span class="activity-icon">🦪</span>
+      <p class="activity-name">Island Creek Raw Bar</p>
+      <p class="activity-detail">Seasonal outdoor raw bar on the Harborwalk — oysters, chowder, lobster bao. First come, first served. Opens 12 PM.</p>
+      <span class="activity-tag">2nd lunch?</span>
+    </div>
+
+    <div class="activity-card">
+      <span class="activity-icon">⛴️</span>
+      <p class="activity-name">Water taxi to Encore</p>
+      <p class="activity-detail">If the weather's nice after lunch — hop the free shuttle boat from Long Wharf to Encore Boston Harbor. Departures from 1:15 PM. <a href="https://cdn.wynnresorts.com/image/upload/v1777036126/visitwynn_pdfs_files/EBH-Water-Shuttle-Summer-Schedule.pdf" target="_blank" class="map-link">Schedule →</a></p>
+      <span class="activity-tag">Weather permitting</span>
+    </div>
+
+    <div class="activity-card">
+      <span class="activity-icon">⛪</span>
+      <p class="activity-name">Church at the Park</p>
+      <p class="activity-detail">Outdoor Sunday service at Arsenal Community Park in Watertown. Starts 10 AM. <a href="https://maps.app.goo.gl/VJDgWtT6KXhpgshbA" target="_blank" class="map-link">See on map →</a></p>
+      <span class="activity-tag">Sunday</span>
+    </div>
+
+    <div class="activity-card">
+      <span class="activity-icon">🔥</span>
+      <p class="activity-name">Park BBQ</p>
+      <p class="activity-detail">Right after the service, in the same park. Stay and hang before Sophia &amp; Shawn head out.</p>
+      <span class="activity-tag">Sunday</span>
+    </div>
+
+  </div>
+</div>
+
+<hr class="div">
+
+<!-- ─── ITINERARY ─── -->
+<div class="section">
+  <span class="section-label">The plan</span>
+  <h2 class="section-title">Weekend itinerary</h2>
+  <p class="section-desc">A loose plan — subject to nap schedules, appetite, and weather ⛅</p>
+
+  <div class="itin-grid">
+
+    <!-- Saturday 8/29 -->
+    <div class="day-card">
+      <div class="day-head sat">
+        <p class="day-kicker">Day 1</p>
+        <p class="day-name">Saturday, Aug 29</p>
+        <p class="day-tag">Seaport day</p>
+      </div>
+      <div class="day-body">
+
+        <div class="row">
+          <span class="row-icon">🚗</span>
+          <div>
+            <p class="row-time">7:00 AM</p>
+            <p class="row-title">Shawn arrives at Woodland</p>
+          </div>
+        </div>
+        <div class="rule"></div>
+
+        <div class="row">
+          <span class="row-icon">🚗</span>
+          <div>
+            <p class="row-time">~10:00 AM – 2:00 PM</p>
+            <p class="row-title">Drive to Seaport</p>
+            <p class="row-detail">Park once, do the rest on foot. Loose order — everything below is within a few blocks:</p>
+            <div class="row-sub">
+              <div class="row-sub-item">
+                <span>🦞</span>
+                <span><strong>Lunch #1 — James Hook &amp; Co</strong> (opens 10 AM) — <a href="https://maps.app.goo.gl/TwEPK95gDH8XpCBw5" target="_blank" class="map-link">Map →</a></span>
+              </div>
+              <div class="row-sub-item">
+                <span>🛍️</span>
+                <span><strong>Seaport Summer Market</strong> (opens 11 AM) — Seaport Common — <a href="https://www.bostonseaport.xyz/event/seaport-summer-market" target="_blank" class="map-link">Details →</a></span>
+              </div>
+              <div class="row-sub-item">
+                <span>🦪</span>
+                <span><strong>Island Creek Raw Bar</strong> (opens 12 PM) — 2nd lunch, if we're still hungry — <a href="https://shop.islandcreekoysters.com/pages/island-creek-raw-bar-seaport" target="_blank" class="map-link">Info →</a></span>
+              </div>
+              <div class="row-sub-item">
+                <span>☕</span>
+                <span><strong>Coffee / ice cream</strong> — <a href="https://maps.app.goo.gl/R2serZPseUpuiUer9" target="_blank" class="map-link">Ralph's Coffee</a> (Amanda's pick) or <a href="https://saltandstraw.com/" target="_blank" class="map-link">Salt &amp; Straw</a></span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="rule"></div>
+
+        <div class="row">
+          <span class="row-icon">👶</span>
+          <div>
+            <p class="row-time">~2:00 PM</p>
+            <p class="row-title">AJ + N head back for nap</p>
+            <p class="row-detail">Sophia &amp; Shawn can stay in the city to explore more.</p>
+          </div>
+        </div>
+        <div class="rule"></div>
+
+        <div class="row">
+          <span class="row-icon">⛴️</span>
+          <div>
+            <p class="row-time">After lunch · weather permitting</p>
+            <p class="row-title">Water taxi — Long Wharf → Encore</p>
+            <p class="row-detail">If it's a nice afternoon, Sophia &amp; Shawn can catch the free Encore shuttle boat from Long Wharf — departures from 1:15 PM. <a href="https://cdn.wynnresorts.com/image/upload/v1777036126/visitwynn_pdfs_files/EBH-Water-Shuttle-Summer-Schedule.pdf" target="_blank" class="map-link">Schedule →</a></p>
+          </div>
+        </div>
+        <div class="rule"></div>
+
+        <div class="row">
+          <span class="row-icon">🍕</span>
+          <div>
+            <p class="row-time">~5:30 PM</p>
+            <p class="row-title">Dinner — Si Cara (Central Sq, Cambridge)</p>
+            <p class="row-detail">Canotto-style pizza + natural wine — or takeout if everyone's too wiped. <a href="https://maps.app.goo.gl/Fsq9fA8XFtdvnFJA7" target="_blank" class="map-link">Map →</a></p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Sunday 8/30 -->
+    <div class="day-card">
+      <div class="day-head sun">
+        <p class="day-kicker">Day 2</p>
+        <p class="day-name">Sunday, Aug 30</p>
+        <p class="day-tag">Watertown</p>
+      </div>
+      <div class="day-body">
+
+        <div class="row">
+          <span class="row-icon">⛪</span>
+          <div>
+            <p class="row-time">10:00 AM</p>
+            <p class="row-title">Church at the Park</p>
+            <p class="row-detail">Outdoor service at Arsenal Community Park, Watertown. <a href="https://maps.app.goo.gl/VJDgWtT6KXhpgshbA" target="_blank" class="map-link">Map →</a></p>
+          </div>
+        </div>
+        <div class="rule"></div>
+
+        <div class="row">
+          <span class="row-icon">🔥</span>
+          <div>
+            <p class="row-time">After the service</p>
+            <p class="row-title">BBQ in the park</p>
+            <p class="row-detail">Same park — stay and hang.</p>
+          </div>
+        </div>
+        <div class="rule"></div>
+
+        <div class="row">
+          <span class="row-icon">👋</span>
+          <div>
+            <p class="row-time">~3:00 PM</p>
+            <p class="row-title">Sophia &amp; Shawn head out</p>
+            <p class="row-detail">That's a wrap on the weekend.</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<hr class="div">
+
+<!-- ─── FOOD ─── -->
+<div class="section" style="background: var(--cream); max-width: 100%; padding: 64px 24px;">
+  <div style="max-width: 900px; margin: 0 auto;">
+    <span class="section-label">Where we're eating</span>
+    <h2 class="section-title">Food &amp; dining</h2>
+    <p class="section-desc">A Seaport lunch crawl, an outdoor raw bar, coffee and ice cream, and pizza in Cambridge.</p>
+
+    <div class="food-grid">
+
+      <div class="food-card">
+        <span class="food-icon">🦞</span>
+        <p class="food-name"><a href="https://maps.app.goo.gl/TwEPK95gDH8XpCBw5" target="_blank">James Hook &amp; Co</a></p>
+        <p class="food-detail">Working lobster company on Fort Point Channel since 1925 — lobster rolls, chowder, right on the water. Opens 10 AM, first stop of the day.</p>
+      </div>
+
+      <div class="food-card">
+        <span class="food-icon">🦪</span>
+        <p class="food-name"><a href="https://shop.islandcreekoysters.com/pages/island-creek-raw-bar-seaport" target="_blank">Island Creek Raw Bar</a></p>
+        <p class="food-detail">Island Creek's seasonal outdoor raw bar in the Seaport (99 Autumn Lane) — oysters, clam chowder, lobster bao, fish &amp; chips. First come, first served. Opens 12 PM.</p>
+      </div>
+
+      <div class="food-card">
+        <span class="food-icon">☕</span>
+        <p class="food-name"><a href="https://maps.app.goo.gl/R2serZPseUpuiUer9" target="_blank">Ralph's Coffee</a></p>
+        <p class="food-detail">Ralph Lauren's first permanent Boston cafe — retro green espresso bar at 70 Pier 4 Blvd. Open 7 AM – 5 PM. Amanda's pick.</p>
+      </div>
+
+      <div class="food-card">
+        <span class="food-icon">🍦</span>
+        <p class="food-name"><a href="https://saltandstraw.com/" target="_blank">Salt &amp; Straw</a></p>
+        <p class="food-detail">Portland's cult ice cream shop, now at 200 Seaport Blvd — small-batch, weird-in-a-good-way flavors. Right in the mix with the market and Ralph's.</p>
+      </div>
+
+      <div class="food-card">
+        <span class="food-icon">🍕</span>
+        <p class="food-name"><a href="https://maps.app.goo.gl/Fsq9fA8XFtdvnFJA7" target="_blank">Si Cara</a></p>
+        <p class="food-detail">Canotto-style pizza + natural wine in Central Square, Cambridge (425 Mass Ave). Dinner ~5:30 PM — or grab takeout if everyone's wiped.</p>
+      </div>
+
+      <div class="food-card">
+        <span class="food-icon">🔥</span>
+        <p class="food-name">Sunday Park BBQ</p>
+        <p class="food-detail">After church at Arsenal Community Park, Watertown. Grill out in the park before Sophia &amp; Shawn drive home.</p>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ─── FOOTER ─── -->
+<footer>
+  <p class="footer-logo">Pack <span>&amp;</span> Play</p>
+  <p class="footer-sub">Travel Planning</p>
+  <p class="footer-note">Boston · Aug 29–30, 2026 · Questions? Reach out to Amanda.</p>
+</footer>
+
+<!-- ─── PASSWORD GATE ─── -->
+<div id="pw-gate" style="
+  position:fixed;inset:0;z-index:99999;
+  background:#0D2137;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  padding:24px;font-family:'Poppins',sans-serif;
+">
+  <p style="font-size:10px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:rgba(255,255,255,0.35);margin-bottom:24px;">Pack &amp; Play · Trip Planning</p>
+  <h1 style="font-size:clamp(36px,8vw,64px);font-weight:700;color:#fff;letter-spacing:-2px;margin-bottom:8px;text-align:center;">Boston Weekend</h1>
+  <p style="font-size:13px;font-weight:500;letter-spacing:3px;color:#FF9F6B;text-transform:uppercase;margin-bottom:40px;">Aug 29 – 30, 2026 · Boston, MA</p>
+
+  <div style="width:100%;max-width:320px;">
+    <input id="pw-input" type="password" placeholder="Enter password"
+      style="width:100%;padding:14px 16px;border-radius:10px;border:2px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);color:#fff;font-family:'Poppins',sans-serif;font-size:15px;font-weight:500;outline:none;box-sizing:border-box;margin-bottom:10px;transition:border-color 0.2s;"
+      onkeydown="if(event.key==='Enter') checkPw()"
+    />
+    <button onclick="checkPw()" style="width:100%;padding:14px;border-radius:10px;border:none;background:#E8365D;color:#fff;font-family:'Poppins',sans-serif;font-size:14px;font-weight:700;cursor:pointer;letter-spacing:0.5px;transition:opacity 0.15s;" onmouseover="this.style.opacity='0.88'" onmouseout="this.style.opacity='1'">
+      Let's Go →
+    </button>
+    <p id="pw-error" style="color:#FF9F6B;font-size:12px;text-align:center;margin-top:10px;opacity:0;transition:opacity 0.2s;">Wrong password — try again</p>
+  </div>
+
+  <p style="position:absolute;bottom:24px;font-size:10px;color:rgba(255,255,255,0.2);letter-spacing:1px;">PRIVATE · INVITE ONLY</p>
+</div>
+
+<script>
+  function unlockBoston(instant) {
+    var gate = document.getElementById('pw-gate');
+    if (instant) {
+      gate.style.display = 'none';
+    } else {
+      gate.style.transition = 'opacity 0.4s';
+      gate.style.opacity = '0';
+      setTimeout(function() { gate.style.display = 'none'; }, 400);
+    }
+    window.dispatchEvent(new Event('boston:unlock'));
+  }
+
+  var bostonAuthed = false;
+  try { bostonAuthed = sessionStorage.getItem('boston-auth') === '1'; } catch (e) {}
+  if (bostonAuthed) { unlockBoston(true); }
+
+  function checkPw() {
+    var input = document.getElementById('pw-input').value;
+    if (input === 'bostonaug2026') {
+      try { sessionStorage.setItem('boston-auth', '1'); } catch (e) {}
+      unlockBoston(false);
+    } else {
+      var err = document.getElementById('pw-error');
+      var inp = document.getElementById('pw-input');
+      err.style.opacity = '1';
+      inp.style.borderColor = '#E8365D';
+      inp.value = '';
+      inp.focus();
+      setTimeout(function() {
+        err.style.opacity = '0';
+        inp.style.borderColor = 'rgba(255,255,255,0.15)';
+      }, 2500);
+    }
+  }
+</script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+  // ── BOSTON MAP ──
+  var isMobile = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+  var map = L.map('boston-map', {
+    scrollWheelZoom: false,
+    dragging: !isMobile,
+    tap: false
+  }).setView([42.365, -71.10], 11);
+
+  if (isMobile) {
+    var hint = document.createElement('div');
+    hint.style.cssText = 'position:absolute;top:10px;left:50%;transform:translateX(-50%);z-index:999;background:rgba(13,33,55,0.9);color:#fff;font-family:Poppins,sans-serif;font-size:11px;font-weight:500;padding:6px 14px;border-radius:100px;transition:opacity 0.4s;pointer-events:none;';
+    hint.textContent = '👆 Tap to interact with map';
+    document.querySelector('#boston-map').parentElement.style.position = 'relative';
+    document.querySelector('#boston-map').parentElement.appendChild(hint);
+    map.getContainer().addEventListener('click', function() {
+      map.dragging.enable();
+      hint.style.opacity = '0';
+      setTimeout(function() { hint.remove(); }, 400);
+    }, { once: true });
+  }
+
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    maxZoom: 18
+  }).addTo(map);
+
+  function makePin(emoji, bgColor, size) {
+    size = size || 32;
+    var half = size / 2;
+    var fs = Math.round(size * 0.48);
+    return L.divIcon({
+      className: '',
+      html: '<div style="width:' + size + 'px;height:' + size + 'px;border-radius:50%;background:' + bgColor + ';border:2.5px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,0.28);display:flex;align-items:center;justify-content:center;font-size:' + fs + 'px;cursor:pointer;">' + emoji + '</div>',
+      iconSize: [size, size],
+      iconAnchor: [half, half]
+    });
+  }
+
+  function popupHtml(title, subtitle) {
+    return '<div style="font-family:Poppins,sans-serif;min-width:160px;max-width:210px;">'
+      + '<div style="font-weight:700;font-size:13px;color:#0D2137;margin-bottom:4px;">' + title + '</div>'
+      + '<div style="font-size:11px;color:#666;line-height:1.5;">' + subtitle + '</div>'
+      + '</div>';
+  }
+
+  var bounds = [];
+
+  // ── RESTAURANTS & FOOD ──
+  var foodStops = [
+    { lat: 42.35495, lng: -71.05098, emoji: '🦞', name: 'James Hook & Co',      desc: 'Lunch #1 · opens 10 AM · lobster rolls & chowder on the water', url: 'https://maps.app.goo.gl/TwEPK95gDH8XpCBw5' },
+    { lat: 42.35067, lng: -71.04530, emoji: '🦪', name: 'Island Creek Raw Bar', desc: '2nd lunch? · opens 12 PM · outdoor · 99 Autumn Lane', url: 'https://shop.islandcreekoysters.com/pages/island-creek-raw-bar-seaport' },
+    { lat: 42.35017, lng: -71.04345, emoji: '☕', name: "Ralph's Coffee",        desc: "Amanda's pick · 70 Pier 4 Blvd · 7 AM – 5 PM", url: 'https://maps.app.goo.gl/R2serZPseUpuiUer9' },
+    { lat: 42.35004, lng: -71.04106, emoji: '🍦', name: 'Salt & Straw',          desc: 'Ice cream · 200 Seaport Blvd · small-batch flavors', url: 'https://saltandstraw.com/' },
+    { lat: 42.36370, lng: -71.10044, emoji: '🍕', name: 'Si Cara',               desc: 'Dinner ~5:30 PM · canotto pizza & natural wine · Central Sq, Cambridge', url: 'https://maps.app.goo.gl/Fsq9fA8XFtdvnFJA7' }
+  ];
+
+  foodStops.forEach(function(p) {
+    bounds.push([p.lat, p.lng]);
+    L.marker([p.lat, p.lng], { icon: makePin(p.emoji, '#E8365D', 30), zIndexOffset: 500 })
+      .addTo(map)
+      .bindTooltip(p.name, { direction: 'top', offset: [0, -16] })
+      .bindPopup(popupHtml(p.name, p.desc + ' · <a href="' + p.url + '" target="_blank" style="color:#E8365D;font-weight:600;">Map →</a>'));
+  });
+
+  // ── STOPS & LANDMARKS ──
+  var landmarks = [
+    { lat: 42.35160, lng: -71.04470, emoji: '🛍️', name: 'Seaport Summer Market',   desc: 'Seaport Common · Saturdays only · 11 AM – 6 PM', url: 'https://www.bostonseaport.xyz/event/seaport-summer-market' },
+    { lat: 42.35990, lng: -71.05010, emoji: '⛴️', name: 'Long Wharf',               desc: 'Water taxi to Encore (weather permitting) · from 1:15 PM', url: 'https://cdn.wynnresorts.com/image/upload/v1777036126/visitwynn_pdfs_files/EBH-Water-Shuttle-Summer-Schedule.pdf' },
+    { lat: 42.39553, lng: -71.06926, emoji: '🎰', name: 'Encore Boston Harbor',     desc: 'Optional afternoon · Everett · water taxi from Long Wharf', url: 'https://www.google.com/maps/search/?api=1&query=Encore%20Boston%20Harbor' },
+    { lat: 42.36106, lng: -71.15991, emoji: '⛪', name: 'Arsenal Community Park',    desc: 'Sunday · church service 10 AM + BBQ after · Watertown', url: 'https://maps.app.goo.gl/VJDgWtT6KXhpgshbA' }
+  ];
+
+  landmarks.forEach(function(l) {
+    bounds.push([l.lat, l.lng]);
+    L.marker([l.lat, l.lng], { icon: makePin(l.emoji, '#0EA5E9', 30), zIndexOffset: 1000 })
+      .addTo(map)
+      .bindTooltip(l.name, { direction: 'top', offset: [0, -16] })
+      .bindPopup(popupHtml(l.name, l.desc + ' · <a href="' + l.url + '" target="_blank" style="color:#E8365D;font-weight:600;">Map →</a>'));
+  });
+
+  function fitBostonMap() {
+    map.invalidateSize();
+    var size = map.getSize();
+    if (size.x < 40 || size.y < 40) return; // container not laid out yet — wait for a resize
+    if (bounds.length) map.fitBounds(bounds, { padding: [40, 50] });
+  }
+
+  fitBostonMap();
+  window.addEventListener('load', function () { setTimeout(fitBostonMap, 150); });
+  window.addEventListener('boston:unlock', function () { setTimeout(fitBostonMap, 100); });
+
+  // Re-fit whenever the map container gains or changes size (tab reveal, window resize, rotate)
+  if (typeof ResizeObserver !== 'undefined') {
+    var raf;
+    new ResizeObserver(function () {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(fitBostonMap);
+    }).observe(document.getElementById('boston-map'));
+  }
+</script>
+</body>
+</html>
